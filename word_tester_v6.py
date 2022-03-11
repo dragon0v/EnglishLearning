@@ -46,6 +46,10 @@ elif USERNAME=="NeoBanana":
     PATH_SHANBAY = r"C:\Users\NeoBanana\OneDrive\shanbay1.xlsx"
     PATH_SHANBAY_BACKUP = os.path.join(os.path.expanduser('~'),"Desktop","shanbay1-%d.xlsx"%int(time.time()))
     PATH_AUDIO = r"D:\python\英语学习\voices"
+else:
+    PATH_SHANBAY = r"shanbay1.xlsx"
+    PATH_SHANBAY_BACKUP = os.path.join(os.path.expanduser('~'),"Desktop","shanbay1-%d.xlsx"%int(time.time()))
+    PATH_AUDIO = r"voices"
 
 
 
