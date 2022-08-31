@@ -6,7 +6,14 @@ Created on Tue Sep 15 18:02:56 2020
 """
 
 #word searcher
-
+# done 加入例句后会有bug --已增加do_clear中的列长度，应该ok
+# TODO 例句只能加一条
+# done undo last changes
+'''
+  File "F:/OneDrive/word_finder.py", line 349, in add
+    if(self.list_example_raw[self.current_index][0]=="="):
+TypeError: 'NoneType' object is not subscriptable
+'''
 from tkinter import *
 import tkinter.messagebox
 import tkinter.font as tf
@@ -22,20 +29,15 @@ from openpyxl import load_workbook
 print("Hello,",os.environ['USERNAME']) #可能不成功因为与环境变量有关
 USERNAME = os.environ['USERNAME']
 if USERNAME=="ToxicNeoBanana":
-    PATH_SHANBAY = r"shanbay1.xlsx"
+    PATH_SHANBAY = r"F:\OneDrive\shanbay1.xlsx"
     PATH_SHANBAY_BACKUP = os.path.join(os.path.expanduser('~'),"Desktop","shanbay1-%d.xlsx"%int(time.time()))
-    PATH_AUDIO = r"voices"
+    PATH_AUDIO = r"D:\python\英语学习\voices"
     PATH_SEARCHPY = r"D:\python\英语学习\批量搜词写入excel - 自动换行下载音频.py"
 elif USERNAME=="NeoBanana":
-    PATH_SHANBAY = r"shanbay1.xlsx"
+    PATH_SHANBAY = r"C:\Users\NeoBanana\OneDrive\shanbay1.xlsx"
     PATH_SHANBAY_BACKUP = os.path.join(os.path.expanduser('~'),"Desktop","shanbay1-%d.xlsx"%int(time.time()))
-    PATH_AUDIO = r"voices"
+    PATH_AUDIO = r"D:\python\英语学习\voices"
     PATH_SEARCHPY = r"D:\python\英语学习\批量搜词写入excel - 自动换行下载音频.py"
-else:
-    PATH_SHANBAY = r"shanbay1.xlsx"
-    PATH_SHANBAY_BACKUP = os.path.join(os.path.expanduser('~'),"Desktop","shanbay1-%d.xlsx"%int(time.time()))
-    PATH_AUDIO = r"voices"
-    PATH_SEARCHPY = r"batchcrawler.py"
 
 COLOR_BG_I = '#ffafaf'
 COLOR_FG_I = '#ff2727'
@@ -45,6 +47,8 @@ COLOR_BG_U = '#acb9ca'
 COLOR_FG_U = '#333f4f'
 COLOR_BG_N = '#F7F762'
 COLOR_FG_N = 'black'
+COLOR_BG_G = '#BDD7EE'  # GRE常考，默认为practice的水平，只有真题见到才打这个标签
+COLOR_FG_G = '#0070C0'
 COLOR_WRONG_WORD = 'red'
 COLOR_PASS = '#444' #回车过去的单词颜色
 
@@ -95,19 +99,23 @@ class Finder():
         self.button_baidu.place(x=390,y=10,width=60,height=24,anchor=NW)
         self.button_youdao = Button(self.canvas,text="Cambridge",command=lambda:self.open_url('youdao'))
         self.button_youdao.place(x=390,y=36,width=60,height=24,anchor=NW)
-        self.button_save = Button(self.canvas,text="save",command=lambda:self.process_save())
-        self.button_save.place(x=460,y=10,width=12,height=12,anchor=NW)
-        self.button_search = Button(self.canvas,text="search",command=lambda:self.process_search())
-        self.button_search.place(x=460,y=28,width=12,height=12,anchor=NW)
-        self.button_open = Button(self.canvas,text="open",command=lambda:self.process_open())
-        self.button_open.place(x=460,y=46,width=12,height=12,anchor=NW)
+        self.button_save = Button(self.canvas,text="存",command=lambda:self.process_save())
+        self.button_save.place(x=460,y=10,width=14,height=14,anchor=NW)
+#        self.button_search = Button(self.canvas,text="搜",command=lambda:self.process_search())
+#        self.button_search.place(x=460,y=28,width=14,height=14,anchor=NW)
+        self.button_search = Button(self.canvas,text="撤",command=lambda:self.process_undo())
+        self.button_search.place(x=460,y=28,width=14,height=14,anchor=NW)
+        self.button_open = Button(self.canvas,text="开",command=lambda:self.process_open())
+        self.button_open.place(x=460,y=46,width=14,height=14,anchor=NW)
         
         self.button_ipu_i = Button(self.canvas,text="",command=lambda:self.set_ipu('i'),background=COLOR_BG_I)
         self.button_ipu_i.place(x=10,y=40,width=50,height=20,anchor=NW)
         self.button_ipu_p = Button(self.canvas,text="",command=lambda:self.set_ipu('p'),background=COLOR_BG_P)
         self.button_ipu_p.place(x=65,y=40,width=50,height=20,anchor=NW)
         self.button_ipu_u = Button(self.canvas,text="",command=lambda:self.set_ipu('u'),background=COLOR_BG_U)
-        self.button_ipu_u.place(x=120,y=40,width=50,height=20,anchor=NW)
+        self.button_ipu_u.place(x=120,y=40,width=20,height=20,anchor=NW)
+        self.button_ipu_u = Button(self.canvas,text="",command=lambda:self.set_ipu('g'),background=COLOR_BG_G)
+        self.button_ipu_u.place(x=150,y=40,width=20,height=20,anchor=NW)
         
         self.label_paraphrase = Label(self.canvas,text="paraphrase")
         self.label_paraphrase.place(x=10,y=70)
@@ -130,7 +138,7 @@ class Finder():
         self.label_example = Label(self.canvas,text="example")
         self.label_example.place(x=10,y=300)
         self.listbox_example = Listbox(self.canvas)
-        self.listbox_example.place(x=10,y=320,width=440,height=104,anchor=NW)
+        self.listbox_example.place(x=10,y=320,width=840,height=104,anchor=NW)
         
         self.text_addexample = Text(self.canvas)
         self.text_addexample.place(x=10,y=434,width=400,height=72,anchor=NW)
@@ -193,13 +201,17 @@ class Finder():
             self.entry_word['bg'] = COLOR_BG_U
             self.entry_word['fg'] = COLOR_FG_U
             self.add('ipu','unnecessary')
+        elif ipu == 'g':
+            self.entry_word['bg'] = COLOR_BG_G
+            self.entry_word['fg'] = COLOR_FG_G
+            self.add('ipu','GRE常考')
         
     
     def process_find(self):
         self.do_clear()
         #输入的单词已经存在
         if self.word_entry.get() in self.list_word:
-            print("已经存在")
+            print(f"{self.word_entry.get()} 已经存在")
             self.is_shown = True
             #TODO +2
             self.current_index = self.list_word.index(self.word_entry.get())
@@ -215,6 +227,9 @@ class Finder():
             elif self.list_ipu[self.current_index] == 'unnecessary':
                 self.entry_word['bg'] = COLOR_BG_U 
                 self.entry_word['fg'] = COLOR_FG_U
+            elif self.list_ipu[self.current_index] == 'GRE常考':
+                self.entry_word['bg'] = COLOR_BG_G
+                self.entry_word['fg'] = COLOR_FG_G
             else:
                 self.entry_word['bg'] = COLOR_BG_N
                 self.entry_word['fg'] = COLOR_FG_N
@@ -231,6 +246,13 @@ class Finder():
             self.is_shown = False
         else:
             self.process_find()
+    
+    def process_undo(self):
+        if len(self.changelog)>0:
+            self.changelog.pop()
+            print(self.changelog)
+        else:
+            print('no changes')
     
     #add有find的所有功能，并有添加单词的作用
     def process_add(self):
@@ -276,11 +298,11 @@ class Finder():
         self.word_entry.set("")
         
     def do_clear(self):
-        self.listbox_paraphrase.delete(0,9)
-        self.text_jyff.delete(1.0,100.0) #小数点左边行号，从1开始
-        self.text_czbz.delete(1.0,100.0) #小数点右边列号，从0开始
-        self.listbox_example.delete(0,9)
-        self.text_addexample.delete(1.0,100.0)
+        self.listbox_paraphrase.delete(0,900)
+        self.text_jyff.delete(1.0,1000.0) #小数点左边行号，从1开始
+        self.text_czbz.delete(1.0,1000.0) #小数点右边列号，从0开始
+        self.listbox_example.delete(0,900)
+        self.text_addexample.delete(1.0,5000.0)
         self.entry_word['bg'] = COLOR_BG_N
         self.entry_word['fg'] = COLOR_FG_N
         self.play_count = 0
