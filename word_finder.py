@@ -8,12 +8,13 @@ Created on Tue Sep 15 18:02:56 2020
 #word searcher
 # done 加入例句后会有bug --已增加do_clear中的列长度，应该ok
 # TODO 例句只能加一条
-# done undo last changes
+# TODO undo last changes, 现在只是不对数据库产生影响，软件层面还没有undo一些添加的效果
 '''
   File "F:/OneDrive/word_finder.py", line 349, in add
     if(self.list_example_raw[self.current_index][0]=="="):
 TypeError: 'NoneType' object is not subscriptable
 '''
+
 from tkinter import *
 import tkinter.messagebox
 import tkinter.font as tf
@@ -23,6 +24,8 @@ import os
 import random
 import webbrowser
 from openpyxl import load_workbook
+import pickle
+from collections import Counter
 
 
 #以下是全局变量
@@ -33,6 +36,8 @@ if USERNAME=="ToxicNeoBanana":
     PATH_SHANBAY_BACKUP = os.path.join(os.path.expanduser('~'),"Desktop","shanbay1-%d.xlsx"%int(time.time()))
     PATH_AUDIO = r"D:\python\英语学习\voices"
     PATH_SEARCHPY = r"D:\python\英语学习\批量搜词写入excel - 自动换行下载音频.py"
+    PATH_SHANBAY_FREQ = r"F:\OneDrive\shanbay_freq.pkl"
+
 elif USERNAME=="NeoBanana":
     PATH_SHANBAY = r"C:\Users\NeoBanana\OneDrive\shanbay1.xlsx"
     PATH_SHANBAY_BACKUP = os.path.join(os.path.expanduser('~'),"Desktop","shanbay1-%d.xlsx"%int(time.time()))
@@ -61,6 +66,9 @@ class Finder():
         self.win.geometry('480x512+800+380')
         self.win.title("word_finder")
         
+        with open(PATH_SHANBAY_FREQ,'rb') as f:
+            self.shanbay_freq = pickle.load(f)
+
         self.place_widgets()
         
         self.load_excel()
@@ -116,6 +124,13 @@ class Finder():
         self.button_ipu_u.place(x=120,y=40,width=20,height=20,anchor=NW)
         self.button_ipu_u = Button(self.canvas,text="",command=lambda:self.set_ipu('g'),background=COLOR_BG_G)
         self.button_ipu_u.place(x=150,y=40,width=20,height=20,anchor=NW)
+        
+        self.label_freq = Label(self.canvas,text=self.update_freq())
+        self.label_freq.place(x=90,y=70)
+        self.button_freq_down = Button(self.canvas,text="-",command=lambda:self.process_add_freq(-1))
+        self.button_freq_down.place(x=120,y=70,width=20,height=20,anchor=NW)
+        self.button_freq_up = Button(self.canvas,text="+",command=lambda:self.process_add_freq(1))
+        self.button_freq_up.place(x=150,y=70,width=20,height=20,anchor=NW)
         
         self.label_paraphrase = Label(self.canvas,text="paraphrase")
         self.label_paraphrase.place(x=10,y=70)
@@ -336,6 +351,15 @@ class Finder():
         
     def process_open(self):
         os.startfile(PATH_SHANBAY)
+    
+    def update_freq(self):
+        return self.shanbay_freq[self.word_entry.get()]
+    
+    def process_add_freq(self,v):
+        self.shanbay_freq[self.word_entry.get()] += v
+        print(self.shanbay_freq[self.word_entry.get()])
+
+        
         
     #将改动加入changelog
     def add(self,to,content):
@@ -393,6 +417,9 @@ class Finder():
         self.save_excel()
     
     def save_excel(self):
+        with open(PATH_SHANBAY_FREQ,'wb') as f:
+            pickle.dump(self.shanbay_freq,f)
+        
         workbook = load_workbook(PATH_SHANBAY)#找到excel文件
         sheet = workbook["Sheet1"]#找到当前表格
         if(self.changelog!=[]):
@@ -416,6 +443,8 @@ class Finder():
             if(self.changelog!=[]):
                 if tkinter.messagebox.askyesno("未保存","有未保存的改动，是否保存？"):
                     self.save_excel()
+            with open(PATH_SHANBAY_FREQ,'wb') as f:
+                pickle.dump(self.shanbay_freq,f)
             print("exit")
             self.win.destroy()
         else:
