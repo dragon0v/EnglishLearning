@@ -125,12 +125,13 @@ class Finder():
         self.button_ipu_u = Button(self.canvas,text="",command=lambda:self.set_ipu('g'),background=COLOR_BG_G)
         self.button_ipu_u.place(x=150,y=40,width=20,height=20,anchor=NW)
         
-        self.label_freq = Label(self.canvas,text=self.update_freq())
-        self.label_freq.place(x=90,y=70)
+        self.freq_entry = IntVar()
         self.button_freq_down = Button(self.canvas,text="-",command=lambda:self.process_add_freq(-1))
         self.button_freq_down.place(x=120,y=70,width=20,height=20,anchor=NW)
         self.button_freq_up = Button(self.canvas,text="+",command=lambda:self.process_add_freq(1))
         self.button_freq_up.place(x=150,y=70,width=20,height=20,anchor=NW)
+        self.entry_freq = Entry(self.canvas,textvariable=self.freq_entry)
+        self.entry_freq.place(x=180,y=70,width=20)
         
         self.label_paraphrase = Label(self.canvas,text="paraphrase")
         self.label_paraphrase.place(x=10,y=70)
@@ -331,7 +332,9 @@ class Finder():
         temp2 = len(self.list_example[self.current_index])
         for i in range(temp2):
             self.listbox_example.insert(i,self.list_example[self.current_index][i])
-             
+        
+        self.update_freq()
+        
 #    def process_change(self,to,content):
 #        index=self.current_index
 #        log=[index,to,content]
@@ -353,11 +356,14 @@ class Finder():
         os.startfile(PATH_SHANBAY)
     
     def update_freq(self):
-        return self.shanbay_freq[self.word_entry.get()]
+        # 使stringvar的值永远等于Counter的值
+        self.freq_entry.set(self.shanbay_freq[self.word_entry.get()])
     
     def process_add_freq(self,v):
         self.shanbay_freq[self.word_entry.get()] += v
-        print(self.shanbay_freq[self.word_entry.get()])
+        self.update_freq()
+#        self.freq_entry = str(self.shanbay_freq[self.word_entry.get()])
+        print(self.word_entry.get(),self.shanbay_freq[self.word_entry.get()])
 
         
         
