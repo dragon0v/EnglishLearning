@@ -313,6 +313,7 @@ class Finder():
         self.do_clear()
         self.word_entry.set("")
         
+        
     def do_clear(self):
         self.listbox_paraphrase.delete(0,900)
         self.text_jyff.delete(1.0,1000.0) #小数点左边行号，从1开始
@@ -322,6 +323,7 @@ class Finder():
         self.entry_word['bg'] = COLOR_BG_N
         self.entry_word['fg'] = COLOR_FG_N
         self.play_count = 0
+        self.freq_entry.set(0)
         
     def process_show(self):
         temp1 = len(self.list_paraphrase[self.current_index])
