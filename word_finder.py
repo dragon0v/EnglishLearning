@@ -105,8 +105,10 @@ class Finder():
         self.button_clear.place(x=320,y=10,width=60,height=50,anchor=NW)
         self.button_baidu = Button(self.canvas,text="bing",command=lambda:self.open_url('bing'))
         self.button_baidu.place(x=390,y=10,width=60,height=24,anchor=NW)
-        self.button_youdao = Button(self.canvas,text="Cambridge",command=lambda:self.open_url('youdao'))
-        self.button_youdao.place(x=390,y=36,width=60,height=24,anchor=NW)
+        self.button_camb = Button(self.canvas,text="剑",command=lambda:self.open_url('Cambridge'))
+        self.button_camb.place(x=390,y=36,width=30,height=24,anchor=NW)
+        self.button_wbst = Button(self.canvas,text="韦",command=lambda:self.open_url('Webster'))
+        self.button_wbst.place(x=420,y=36,width=30,height=24,anchor=NW)
         self.button_save = Button(self.canvas,text="存",command=lambda:self.process_save())
         self.button_save.place(x=460,y=10,width=14,height=14,anchor=NW)
 #        self.button_search = Button(self.canvas,text="搜",command=lambda:self.process_search())
@@ -345,9 +347,11 @@ class Finder():
     def open_url(self,hint):
         if hint == 'bing':
             webbrowser.open('https://cn.bing.com/dict/search?q=%s'%self.word_entry.get())
-        elif hint == 'youdao':
+        elif hint == 'Cambridge':
 #            webbrowser.open('https://www.dict.youdao.com') #TODO
             webbrowser.open('https://dictionary.cambridge.org/dictionary/english-chinese-simplified/%s'%self.word_entry.get())
+        elif hint == 'Webster':
+            webbrowser.open('https://www.merriam-webster.com/dictionary/%s'%self.word_entry.get())
     def process_save(self):
         self.save_excel()
     
