@@ -43,6 +43,7 @@ elif USERNAME=="NeoBanana":
     PATH_SHANBAY_BACKUP = os.path.join(os.path.expanduser('~'),"Desktop","shanbay1-%d.xlsx"%int(time.time()))
     PATH_AUDIO = r"D:\python\英语学习\voices"
     PATH_SEARCHPY = r"D:\python\英语学习\批量搜词写入excel - 自动换行下载音频.py"
+    PATH_SHANBAY_FREQ = r"C:\Users\NeoBanana\OneDrive\shanbay_freq.pkl"
 
 COLOR_BG_I = '#ffafaf'
 COLOR_FG_I = '#ff2727'
